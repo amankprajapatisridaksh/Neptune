@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aman's toolkit · fresh light theme</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: #f2f5f7;
+            background-image: linear-gradient(135deg, #e9f0f5 0%, #dbe6ec 100%);
+            min-height: 100vh;
+            padding: 24px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ----- BANNER exactly as given, but lighter background ----- */
+        .designer-strip {
+            width: 100%;
+            max-width: 1350px;
+            background: #ffffffd9;
+            backdrop-filter: blur(6px);
+            border: 2px solid #b0c8d6;
+            border-radius: 40px 40px 20px 20px;
+            padding: 24px 36px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 18px 28px -12px #758f9e;
+            color: #1e3b4a;
+        }
+
+        .designer-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .designer-text .line1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0d4b63;
+        }
+
+        .designer-text .line2 {
+            font-size: 1.2rem;
+            color: #2c5f77;
+            margin-top: 4px;
+        }
+
+        .designer-text .line3 {
+            font-size: 1.3rem;
+            color: #a5651a;
+            word-break: break-all;
+        }
+
+        .designer-badge {
+            background: #f1e6cf;
+            color: #0e4b5e;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 2rem;
+            border: 3px solid #bb9f6e;
+            box-shadow: 0 6px 0 #9fb8c7;
+            text-align: center;
+        }
+
+        .designer-badge small {
+            font-size: 0.95rem;
+            display: block;
+            color: #255e73;
+        }
+
+        /* ----- 2x2 grid ----- */
+        .calc-grid {
+            max-width: 1350px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        /* card – light mode, soft shadows */
+        .card {
+            background: #ffffffea;
+            backdrop-filter: blur(2px);
+            border: 1px solid #bed3e2;
+            border-radius: 44px;
+            padding: 24px 22px 28px;
+            box-shadow: 0 20px 30px -12px #8fa9bb;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card h2 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            color: #154e63;
+            border-left: 6px solid #e09d42;
+            padding-left: 18px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #266480;
+            margin-bottom: 5px;
+            margin-left: 8px;
+        }
+
+        .input-field {
+            display: flex;
+            align-items: center;
+            background: #ecf5fa;
+            border-radius: 50px;
+            border: 1px solid #8fb5cc;
+            box-shadow: inset 0 3px 8px #c1d6e4;
+        }
+
+        .input-field:focus-within {
+            border-color: #e09d42;
+            box-shadow: inset 0 3px 8px #c1d6e4, 0 0 0 2px #e09d4230;
+        }
+
+        .currency-tag {
+            background: #c8ddec;
+            color: #1d6079;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 50px 0 0 50px;
+            border-right: 2px solid #8fb5cc;
+        }
+
+        .input-field input {
+            background: transparent;
+            border: none;
+            padding: 12px 18px;
+            font-size: 1.5rem;
+            font-weight: 500;
+            width: 100%;
+            outline: none;
+            color: #0b3a4b;
+            text-align: right;
+        }
+
+        .input-field input::placeholder {
+            color: #6c96af;
+        }
+
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .calculate-btn {
+            background: #e7b45a;
+            border: none;
+            border-radius: 40px;
+            padding: 14px 10px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1b3e4d;
+            border-bottom: 4px solid #aa833f;
+            margin: 10px 0 20px;
+            cursor: pointer;
+            transition: 0.06s;
+            box-shadow: 0 8px 12px -8px #5c737f;
+        }
+
+        .calculate-btn:active {
+            transform: translateY(4px);
+            border-bottom-width: 2px;
+        }
+
+        .result-panel {
+            background: #e1eff8;
+            border-radius: 36px;
+            padding: 16px 16px;
+            border: 1px solid #9fbed3;
+            box-shadow: inset 0 2px 6px #b4cfdf;
+        }
+
+        .result-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            border-bottom: 1px dashed #84adc7;
+            padding: 10px 6px;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 1.1rem;
+            color: #19526b;
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-size: 1.6rem;
+            font-weight: 600;
+            background: #ffffff;
+            padding: 5px 20px;
+            border-radius: 40px;
+            color: #124a5e;
+            box-shadow: inset 0 2px 6px #b0cbd9;
+            min-width: 135px;
+            text-align: center;
+            border: 1px solid #91b7cf;
+        }
+
+        .result-value small {
+            font-size: 1rem;
+            color: #266480;
+        }
+
+        .badge-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 15px 0 0px;
+        }
+
+        .badge {
+            background: #daeaf5;
+            color: #15556b;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 1rem;
+            border: 1px solid #7da5be;
+        }
+
+        .footnote {
+            text-align: center;
+            color: #1b6079;
+            margin-top: 18px;
+            font-size: 0.95rem;
+            background: #e7f1f7;
+            padding: 8px 14px;
+            border-radius: 40px;
+            border: 1px solid #8bb2ca;
+        }
+
+        @media (max-width: 800px) {
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- exactly your given image text, now on light background -->
+    <div class="designer-strip">
+        <div class="designer-text">
+            <span class="line1">DESIGNED BY — AMAN K. PRAJAPATI</span>
+            <span class="line2">just a single creation of divine.</span>
+            <span class="line3">sridakshprajapati63540@gmail.com</span>
+        </div>
+        <div class="designer-badge">
+            POWERED BY<br><small>TECHNOLOGY</small>
+        </div>
+    </div>
+
+    <!-- 4 calculators – fresh light theme -->
+    <div class="calc-grid">
+
+        <!-- 1. discount finder -->
+        <div class="card">
+            <h2>1. Discount finder</h2>
+            <div class="input-group"><label>rack rate (original price) ₹</label><div class="input-field"><span class="currency-tag">₹</span><input type="number" id="rack" value="4000"></div></div>
+            <div class="input-group"><label>you charge client ₹</label><div class="input-field"><span class="currency-tag">₹</span><input type="number" id="client" value="3400"></div></div>
+            <button class="calculate-btn" id="btnDiscount">calculate</button>
+            <div class="result-panel">
+                <div class="result-row"><span class="result-label">discount %</span><span class="result-value" id="discPer">-- %</span></div>
+                <div class="result-row"><span class="result-label">discount amount</span><span class="result-value" id="discAmt">--</span></div>
+                <div class="result-row"><span class="result-label">you keep</span><span class="result-value" id="keepAmt">--</span></div>
+                <div class="badge-row"><span class="badge" id="discBadge1">🔹</span><span class="badge" id="discBadge2">🔹</span></div>
+            </div>
+            <div class="footnote" id="discFootnote">4000 rack, charge 3400 → 15% discount</div>
+        </div>
+
+        <!-- 2. profit & GST -->
+        <div class="card">
+            <h2>2. Profit & GST</h2>
+            <div class="input-group"><label>cost price (what you paid) ₹</label><div class="input-field"><span class="currency-tag">₹</span><input type="number" id="cost" value="2800"></div></div>
+            <div class="input-group"><label>selling price (before tax) ₹</label><div class="input-field"><span class="currency-tag">₹</span><input type="number" id="sell" value="3400"></div></div>
+            <div class="input-group"><label>gst rate (%)</label><div class="input-field"><span class="currency-tag">%</span><input type="number" id="gst" value="12"></div></div>
+            <button class="calculate-btn" id="btnProfit">calculate</button>
+            <div class="result-panel">
+                <div class="result-row"><span class="result-label">gross profit</span><span class="result-value" id="gross">--</span></div>
+                <div class="result-row"><span class="result-label">margin (on SP)</span><span class="result-value" id="margin">-- %</span></div>
+                <div class="result-row"><span class="result-label">markup (on CP)</span><span class="result-value" id="markup">-- %</span></div>
+                <div class="result-row"><span class="result-label">gst amount</span><span class="result-value" id="gstAmt">--</span></div>
+                <div class="result-row"><span class="result-label">final price (with GST)</span><span class="result-value" id="finalGst">--</span></div>
+                <div class="badge-row"><span class="badge" id="profitBadge1">📈</span><span class="badge" id="profitBadge2">📉</span></div>
+            </div>
+            <div class="footnote" id="profitFootnote">cost 2800, sell 3400, gst 12% → final 3808</div>
+        </div>
+
+        <!-- 3. tax reverser (exactly 4000 / 112% = 3571.43) -->
+        <div class="card">
+            <h2>3. Tax reverser</h2>
+            <div class="input-group"><label>final price (including tax) ₹</label><div class="input-field"><span class="currency-tag">₹</span><input type="number" id="finalInc" value="4000"></div></div>
+            <div class="input-group"><label>tax rate (%)</label><div class="input-field"><span class="currency-tag">%</span><input type="number" id="taxRev" value="12"></div></div>
+            <button class="calculate-btn" id="btnReverse">calculate</button>
+            <div class="result-panel">
+                <div class="result-row"><span class="result-label">price before tax</span><span class="result-value" id="beforeTax">--</span></div>
+                <div class="result-row"><span class="result-label">tax amount</span><span class="result-value" id="taxAmtRev">--</span></div>
+                <div class="result-row"><span class="result-label">before tax + tax</span><span class="result-value" id="checkSum">--</span></div>
+                <div class="badge-row"><span class="badge" id="revBadge1">🔽</span><span class="badge" id="revBadge2">🔼</span></div>
+            </div>
+            <div class="footnote" id="revFootnote">4000 ÷ 1.12 = 3571.43 → +12% = 4000</div>
+        </div>
+
+        <!-- 4. percentage tool -->
+        <div class="card">
+            <h2>4. Percentage tool</h2>
+            <div class="input-group"><label>enter any amount ₹</label><div class="input-field"><span class="currency-tag">₹</span><input type="number" id="baseAmt" value="3571.43"></div></div>
+            <div class="input-group"><label>percentage (%)</label><div class="input-field"><span class="currency-tag">%</span><input type="number" id="percent" value="12"></div></div>
+            <button class="calculate-btn" id="btnPercent">calculate</button>
+            <div class="result-panel">
+                <div class="result-row"><span class="result-label">percentage value</span><span class="result-value" id="percVal">--</span></div>
+                <div class="result-row"><span class="result-label">amount + percent</span><span class="result-value" id="plusPerc">--</span></div>
+                <div class="result-row"><span class="result-label">amount − percent</span><span class="result-value" id="minusPerc">--</span></div>
+                <div class="badge-row"><span class="badge" id="percBadge1">➕</span><span class="badge" id="percBadge2">➖</span></div>
+            </div>
+            <div class="footnote" id="percFootnote">3571.43 + 12% = 4000 | 3571.43 − 12% = 3142.86</div>
+        </div>
+    </div>
+
+    <!-- simple footer -->
+    <div style="color:#46758d; margin-top: 50px; font-weight: 400;">four calculators · aman k prajapati · light edition</div>
+
+    <script>
+        (function() {
+            // format as indian rupees (2 decimals)
+            const fm = (x) => {
+                return '₹' + x.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            };
+
+            // 1. DISCOUNT
+            const rackInp = document.getElementById('rack');
+            const clientInp = document.getElementById('client');
+            const btn1 = document.getElementById('btnDiscount');
+            const disPer = document.getElementById('discPer');
+            const disAmt = document.getElementById('discAmt');
+            const keep = document.getElementById('keepAmt');
+            const bad1 = document.getElementById('discBadge1');
+            const bad2 = document.getElementById('discBadge2');
+            const foot1 = document.getElementById('discFootnote');
+
+            function upd1() {
+                let r = parseFloat(rackInp.value) || 0; if (r<0) r=0;
+                let c = parseFloat(clientInp.value) || 0; if (c<0) c=0;
+                if (r === 0) {
+                    disPer.innerText = '–'; disAmt.innerText = fm(0); keep.innerText = fm(c);
+                    bad1.innerText = 'rack zero'; bad2.innerText = ''; foot1.innerText = 'rack rate cannot be zero'; return;
+                }
+                let disc = r - c;
+                let perc = (disc / r) * 100;
+                disPer.innerText = perc.toFixed(2) + ' %';
+                disAmt.innerText = fm(disc);
+                keep.innerText = fm(c);
+                if (perc > 0) { bad1.innerText = 'discount ' + perc.toFixed(1) + '%'; bad2.innerText = 'save ' + fm(disc); }
+                else if (perc < 0) { bad1.innerText = 'premium ' + Math.abs(perc).toFixed(1) + '%'; bad2.innerText = 'extra charge'; }
+                else { bad1.innerText = 'exact'; bad2.innerText = 'no discount'; }
+                foot1.innerText = `rack ${fm(r)}, charge ${fm(c)} → ${perc.toFixed(2)}% discount`;
+            }
+            btn1.addEventListener('click', upd1);
+            rackInp.addEventListener('input', upd1);
+            clientInp.addEventListener('input', upd1);
+
+            // 2. PROFIT & GST
+            const costInp = document.getElementById('cost');
+            const sellInp = document.getElementById('sell');
+            const gstInp = document.getElementById('gst');
+            const btn2 = document.getElementById('btnProfit');
+            const grossEl = document.getElementById('gross');
+            const marginEl = document.getElementById('margin');
+            const markupEl = document.getElementById('markup');
+            const gstAmtEl = document.getElementById('gstAmt');
+            const finalGstEl = document.getElementById('finalGst');
+            const pBadge1 = document.getElementById('profitBadge1');
+            const pBadge2 = document.getElementById('profitBadge2');
+            const foot2 = document.getElementById('profitFootnote');
+
+            function upd2() {
+                let cost = parseFloat(costInp.value) || 0; if (cost<0) cost=0;
+                let sell = parseFloat(sellInp.value) || 0; if (sell<0) sell=0;
+                let rate = parseFloat(gstInp.value) || 0; if (rate<0) rate=0;
+                let profit = sell - cost;
+                let margin = (sell !== 0) ? (profit/sell)*100 : 0;
+                let markup = (cost !== 0) ? (profit/cost)*100 : 0;
+                let gstVal = (sell * rate) / 100;
+                let sellInc = sell + gstVal;
+                grossEl.innerText = fm(profit);
+                marginEl.innerText = margin.toFixed(2) + ' %';
+                markupEl.innerText = markup.toFixed(2) + ' %';
+                gstAmtEl.innerText = fm(gstVal);
+                finalGstEl.innerText = fm(sellInc);
+                if (profit > 0) { pBadge1.innerText = 'profit ' + fm(profit); pBadge2.innerText = 'margin ' + margin.toFixed(1) + '%'; }
+                else if (profit < 0) { pBadge1.innerText = 'loss ' + fm(-profit); pBadge2.innerText = 'negative'; }
+                else { pBadge1.innerText = 'no profit'; pBadge2.innerText = 'break even'; }
+                foot2.innerText = `cost ${fm(cost)}, sell ${fm(sell)}, GST ${rate}% → final ${fm(sellInc)}`;
+            }
+            btn2.addEventListener('click', upd2);
+            costInp.addEventListener('input', upd2);
+            sellInp.addEventListener('input', upd2);
+            gstInp.addEventListener('input', upd2);
+
+            // 3. TAX REVERSER
+            const finalInc = document.getElementById('finalInc');
+            const taxRev = document.getElementById('taxRev');
+            const btn3 = document.getElementById('btnReverse');
+            const beforeTax = document.getElementById('beforeTax');
+            const taxAmtRev = document.getElementById('taxAmtRev');
+            const checkSum = document.getElementById('checkSum');
+            const revBadge1 = document.getElementById('revBadge1');
+            const revBadge2 = document.getElementById('revBadge2');
+            const foot3 = document.getElementById('revFootnote');
+
+            function upd3() {
+                let final = parseFloat(finalInc.value) || 0; if (final<0) final=0;
+                let rate = parseFloat(taxRev.value) || 0; if (rate<0) rate=0;
+                let base = final / (1 + rate/100);
+                let tax = final - base;
+                beforeTax.innerText = fm(base);
+                taxAmtRev.innerText = fm(tax);
+                checkSum.innerText = fm(base + tax);
+                revBadge1.innerText = 'base ' + base.toFixed(0);
+                revBadge2.innerText = 'tax ' + tax.toFixed(0);
+                foot3.innerText = `${fm(final)} ÷ ${rate}% = ${fm(base)}  → +${rate}% = ${fm(base+tax)}`;
+            }
+            btn3.addEventListener('click', upd3);
+            finalInc.addEventListener('input', upd3);
+            taxRev.addEventListener('input', upd3);
+
+            // 4. PERCENTAGE TOOL
+            const baseAmt = document.getElementById('baseAmt');
+            const percInp = document.getElementById('percent');
+            const btn4 = document.getElementById('btnPercent');
+            const percVal = document.getElementById('percVal');
+            const plusPerc = document.getElementById('plusPerc');
+            const minusPerc = document.getElementById('minusPerc');
+            const percBadge1 = document.getElementById('percBadge1');
+            const percBadge2 = document.getElementById('percBadge2');
+            const foot4 = document.getElementById('percFootnote');
+
+            function upd4() {
+                let base = parseFloat(baseAmt.value) || 0; if (base<0) base=0;
+                let p = parseFloat(percInp.value) || 0; if (p<0) p=0;
+                let val = base * p / 100;
+                percVal.innerText = fm(val);
+                plusPerc.innerText = fm(base + val);
+                minusPerc.innerText = fm(base - val);
+                percBadge1.innerText = p + '% = ' + fm(val);
+                percBadge2.innerText = 'add: ' + fm(base+val) + ' | sub: ' + fm(base-val);
+                foot4.innerText = `${fm(base)} + ${p}% = ${fm(base+val)}  |  − ${p}% = ${fm(base-val)}`;
+            }
+            btn4.addEventListener('click', upd4);
+            baseAmt.addEventListener('input', upd4);
+            percInp.addEventListener('input', upd4);
+
+            // initial updates
+            upd1(); upd2(); upd3(); upd4();
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Neptune — Room Confirmation</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Raleway:wght@300;400;600;700&family=Cinzel:wght@700;900&family=Dancing+Script:wght@600;700&family=Orbitron:wght@500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#eaf4ff;--card:#f0f8ff;--card2:#e0f0ff;
+  --gold:#f0c040;--gold2:#c8960c;--goldglow:rgba(240,192,64,.5);
+  --green:#00c8e0;--greenglow:rgba(0,200,224,.4);
+  --light:#0d2a3a;--muted:#1e6680;--dark:#061520;
+  --primary:#1a3a5c;
+}
+body{font-family:'Raleway',sans-serif;background:var(--bg);min-height:100vh;color:#0d2a3a;}
+
+/* ══════════════════════════════════════════════
+   LOCK SCREEN
+══════════════════════════════════════════════ */
+#lockScreen{
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at 50% 40%,#0d4a6e 0%,#061a2e 70%);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+/* animated stars */
+#lockScreen::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%,rgba(255,255,255,.6) 0%,transparent 100%),
+    radial-gradient(1px 1px at 30% 60%,rgba(255,255,255,.4) 0%,transparent 100%),
+    radial-gradient(1px 1px at 70% 15%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 85% 75%,rgba(255,255,255,.3) 0%,transparent 100%),
+    radial-gradient(1px 1px at 50% 90%,rgba(255,255,255,.4) 0%,transparent 100%),
+    radial-gradient(1px 1px at 20% 85%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 90% 40%,rgba(255,255,255,.3) 0%,transparent 100%);
+  pointer-events:none;
+}
+.lcard{
+  background:linear-gradient(145deg,#ffffff,#eaf6ff);
+  border-radius:24px;padding:48px 44px 40px;width:360px;
+  text-align:center;position:relative;
+  border:1px solid rgba(240,192,64,.25);
+  box-shadow:0 0 0 1px rgba(26,100,180,.2),0 30px 80px rgba(0,0,0,.25),0 0 60px rgba(10,60,120,.15);
+}
+/* top glow line */
+.lcard::before{
+  content:'';position:absolute;top:0;left:10%;width:80%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),#4fc3f7,var(--gold),transparent);
+  border-radius:2px;animation:topline 3s ease-in-out infinite;
+}
+@keyframes topline{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+.l-label{font-size:9px;letter-spacing:4px;color:#1e6680;text-transform:uppercase;margin-bottom:24px;}
+
+/* SVG LOCK */
+.lock-svg-wrap{position:relative;display:inline-block;margin-bottom:18px;}
+.lock-svg-wrap svg{width:72px;height:72px;filter:drop-shadow(0 0 16px var(--goldglow));}
+@keyframes lockPulse{0%,100%{filter:drop-shadow(0 0 10px var(--goldglow));}50%{filter:drop-shadow(0 0 24px var(--goldglow)) drop-shadow(0 0 40px rgba(240,192,64,.3));}}
+.lock-svg-wrap svg{animation:lockPulse 2.5s ease-in-out infinite;}
+
+.l-hotel{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;
+  background:linear-gradient(135deg,var(--gold),#fff8dc,var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.1;margin-bottom:4px;}
+.l-sub{font-size:12px;color:#1e6680;font-style:italic;letter-spacing:1px;margin-bottom:4px;}
+.l-div{margin:22px 0;height:1px;background:linear-gradient(90deg,transparent,rgba(240,192,64,.3),transparent);}
+.l-prompt{font-size:9px;letter-spacing:3px;color:#1e6680;text-transform:uppercase;margin-bottom:14px;}
+
+/* STYLISH INPUT */
+.l-input-wrap{position:relative;margin-bottom:4px;}
+.l-input-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.6;pointer-events:none;}
+.l-input{
+  width:100%;padding:15px 16px 15px 46px;
+  background:rgba(10,80,160,.05);
+  border:1.5px solid rgba(30,130,200,.35);border-radius:12px;
+  color:#0d2a3a;font-size:16px;font-family:'Raleway',sans-serif;
+  letter-spacing:8px;text-align:center;
+  transition:all .3s;backdrop-filter:blur(4px);
+}
+.l-input:focus{
+  outline:none;
+  border-color:#4fc3f7;
+  background:rgba(79,195,247,.06);
+  box-shadow:0 0 0 3px rgba(79,195,247,.15),0 0 20px rgba(79,195,247,.2);
+  letter-spacing:10px;
+}
+.l-input::placeholder{letter-spacing:2px;color:rgba(30,100,160,.4);font-size:12px;}
+
+.l-btn{
+  width:100%;margin-top:18px;padding:16px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold2));
+  color:#061a30;font-size:13px;font-weight:800;
+  letter-spacing:3px;text-transform:uppercase;
+  border:none;border-radius:12px;cursor:pointer;
+  box-shadow:0 4px 24px rgba(240,192,64,.35);
+  transition:all .3s;font-family:'Raleway',sans-serif;
+  position:relative;overflow:hidden;
+}
+.l-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.2) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform .5s;
+}
+.l-btn:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(240,192,64,.55);}
+.l-btn:hover::before{transform:translateX(100%);}
+.l-err{color:#c0392b;font-size:11px;margin-top:10px;min-height:16px;font-style:italic;}
+
+/* DESIGNER FOOTER ON LOCK */
+.l-foot{margin-top:28px;padding-top:20px;border-top:1px solid rgba(240,192,64,.25);line-height:1.9;}
+.l-foot .lf1{
+  font-family:'Cinzel',serif;font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,#c8960c,#f0c040,#c8960c);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:nameGlow 2s ease-in-out infinite;letter-spacing:1px;
+}
+@keyframes nameGlow{
+  0%,100%{filter:drop-shadow(0 0 6px rgba(240,192,64,.5));}
+  50%{filter:drop-shadow(0 0 14px rgba(240,192,64,.9)) drop-shadow(0 0 28px rgba(240,192,64,.4));}
+}
+.l-foot .lf2{font-family:'Dancing Script',cursive;font-size:13px;font-weight:600;color:#5aabcc;letter-spacing:.5px;}
+.l-foot .lf3{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:rgba(240,192,64,.55);}
+
+/* ══════════════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════════════ */
+.page{display:none;min-height:100vh;padding:24px;}
+.page.active{display:block;}
+#page1{background:radial-gradient(ellipse at top,#c8e8f5 0%,#eaf4ff 100%);}
+#page2{
+  background:#fff;color:#111;
+  max-width:794px;margin:20px auto;padding:0;
+  box-shadow:0 0 60px rgba(0,0,0,.5);
+}
+.p2-inner{
+  padding:40px 48px;
+  min-height:1123px; /* A4 */
+  position:relative;
+}
+
+/* HEADER PANEL */
+.header-container{text-align:center;margin-bottom:28px;padding:24px 20px;
+  background:linear-gradient(135deg,#0d4a7a,#1565a8);
+  border-radius:16px;border:1px solid rgba(240,192,64,.5);
+  box-shadow:0 8px 32px rgba(26,80,40,.25);
+}
+.hotel-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;
+  background:linear-gradient(135deg,var(--gold),#fff8dc,var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:14px;letter-spacing:1px;}
+
+/* DEV BOX */
+.dev-box{display:inline-block;margin-top:12px;padding:14px 32px 12px;
+  background:#0a2040;border-radius:14px;position:relative;text-align:center;line-height:1.85;}
+.dev-box::before{content:'';position:absolute;inset:-2px;border-radius:15px;
+  background:linear-gradient(135deg,#ff6ec7,#a855f7,#3b82f6,#06b6d4,#10b981);z-index:-1;}
+.dev-name{
+  font-family:'Cinzel',serif;font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,#f0c040,#fff8b0,#f0c040);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:1px;animation:devNameGlow 2.5s ease-in-out infinite;
+}
+@keyframes devNameGlow{
+  0%,100%{filter:drop-shadow(0 0 5px rgba(240,192,64,.5));}
+  50%{filter:drop-shadow(0 0 12px rgba(240,192,64,.9)) drop-shadow(0 0 24px rgba(240,192,64,.4));}
+}
+.dev-sub{font-family:'Dancing Script',cursive;font-size:12px;font-weight:600;color:#90d8f0;letter-spacing:.3px;}
+.dev-sub.tech{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(240,192,64,.6);}
+
+/* FORM PANELS */
+.control-panel{max-width:1100px;margin:0 auto;padding:0;max-height:84vh;overflow-y:auto;}
+.form-section{
+  background:linear-gradient(135deg,#ffffff,#f0f8ff);
+  border:1px solid rgba(30,130,200,.2);
+  box-shadow:0 4px 16px rgba(10,60,140,.08),inset 0 0 30px rgba(30,130,200,.03);
+  border-radius:12px;padding:22px;margin-bottom:18px;
+}
+.section-title{font-size:11px;font-weight:700;color:#b8860b;text-transform:uppercase;
+  letter-spacing:2px;margin-bottom:16px;padding-bottom:10px;
+  border-bottom:1px solid rgba(240,192,64,.15);}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.form-group{display:flex;flex-direction:column;}
+label{font-size:10px;font-weight:700;color:#0d4a7a;margin-bottom:7px;text-transform:uppercase;letter-spacing:1px;}
+input,select,textarea{
+  padding:11px 14px;
+  border:1px solid rgba(30,130,200,.25);border-radius:8px;
+  background:#ffffff;color:#0d2a3a;
+  font-size:13px;font-family:'Raleway',sans-serif;
+  transition:all .3s;box-shadow:inset 0 0 0 1px rgba(30,130,200,.08);
+}
+input:focus,select:focus{
+  outline:none;border-color:var(--green);
+  background:#f0f8ff;
+  box-shadow:0 0 0 3px rgba(30,130,200,.15),inset 0 0 20px rgba(30,130,200,.04);
+}
+select{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a78c8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:16px;padding-right:36px;}
+select option{color:#000;background:#fff;}
+textarea{resize:vertical;}
+.storage-reminder{font-size:9px;color:#8a6500;margin-top:5px;font-weight:600;cursor:pointer;}
+
+.btn-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:28px;}
+button{padding:13px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+  border:none;border-radius:10px;cursor:pointer;transition:all .3s;font-family:'Raleway',sans-serif;}
+.btn-green{background:linear-gradient(135deg,#0d7abf,#1a9de0);color:#ffffff;box-shadow:0 4px 20px rgba(13,122,191,.35);}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a2e0a;box-shadow:0 4px 20px rgba(240,192,64,.3);}
+.btn-outline{background:transparent;color:#8a6500;border:1.5px solid var(--gold);box-shadow:0 0 0 0 transparent;}
+button:hover{transform:translateY(-2px);filter:brightness(1.1);}
+
+.toggle-bar{display:flex;gap:10px;justify-content:center;margin-bottom:22px;flex-wrap:wrap;}
+.toggle-bar button{padding:9px 20px;font-size:10px;
+  background:rgba(13,74,122,.12);color:#8a6500;border:1px solid rgba(184,134,11,.4);letter-spacing:1.5px;}
+.toggle-bar button.active{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#0d2a3a;}
+.back-btn{margin-bottom:16px;padding:9px 18px;
+  background:rgba(13,74,122,.12);color:#8a6500;border:1px solid rgba(184,134,11,.4);
+  border-radius:8px;cursor:pointer;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;}
+
+/* ══════════════════════════════════════════════
+   DOCUMENT PAGE 2
+══════════════════════════════════════════════ */
+.watermark-wrap{
+  position:absolute;inset:0;z-index:0;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;opacity:0.12;
+}
+.watermark-wrap img{max-width:70%;max-height:70%;object-fit:contain;}
+.document-content{position:relative;z-index:1;}
+
+.greeting-box{text-align:center;margin-bottom:28px;padding:20px;
+  background:#f8fff8;border-radius:6px;border:2px solid #d4af37;}
+.greeting-namaste{font-size:22px;font-weight:bold;color:#1a472a;margin-bottom:8px;font-family:'Playfair Display',serif;}
+.greeting-sal{font-size:13px;font-weight:600;color:#1a472a;line-height:1.6;}
+
+.doc-header{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:26px;padding-bottom:18px;border-bottom:3px solid #1a472a;}
+.logo-area{width:110px;height:110px;display:flex;align-items:center;}
+.logo-area img{max-width:100%;max-height:100%;}
+.doc-title{flex:1;text-align:center;margin:0 16px;}
+.doc-title h1{font-family:'Playfair Display',serif;font-size:26px;color:#1a472a;margin-bottom:4px;}
+.doc-title p{font-size:13px;color:#555;text-transform:uppercase;letter-spacing:1px;}
+
+.info-block{background:#fafafa;padding:18px;margin:12px 0;border-radius:6px;border-left:4px solid #d4af37;}
+.info-block h3{font-size:11px;font-weight:bold;text-transform:uppercase;color:#1a472a;
+  margin-bottom:10px;border-bottom:2px solid #d4af37;padding-bottom:5px;letter-spacing:1px;}
+.info-block p{font-size:12px;margin:5px 0;line-height:1.6;color:#222;}
+.room-card{background:#f0f4f0;border:1px solid #d4af37;border-radius:4px;padding:10px;margin:6px 0;}
+.room-card p{font-size:12px;margin:3px 0;color:#222;}
+.calc-section{margin:16px 0;}
+.calc-item{padding:12px 0;border-left:4px solid #1a472a;padding-left:14px;border-bottom:1px solid #e8e8e8;}
+.calc-label{font-weight:700;color:#1a472a;font-size:13px;margin-bottom:3px;}
+.calc-value{font-size:13px;color:#333;}
+.grand-total{background:#1a472a;color:#d4af37;padding:14px;margin:12px 0;box-shadow:0 0 20px rgba(212,175,55,.4);}
+.grand-total-label{color:#d4af37;text-transform:uppercase;font-size:13px;font-weight:bold;letter-spacing:1px;}
+.grand-total-value{color:#d4af37;font-size:18px;font-weight:bold;margin-top:4px;}
+.balance-box{background:linear-gradient(135deg,#fff9e6,#ffe699);border-left:5px solid #ffc107;padding:14px;margin:12px 0;}
+.balance-label{color:#856404;font-size:13px;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+.balance-amount{color:#856404;font-size:18px;font-weight:bold;margin-top:4px;}
+.terms-section{margin-top:24px;padding:18px;background:#f5f5f5;border-radius:6px;font-size:11px;line-height:1.9;border-left:4px solid #1a472a;}
+.terms-section h3{font-size:11px;font-weight:bold;text-transform:uppercase;color:#1a472a;margin-bottom:8px;letter-spacing:1px;}
+.terms-section p{margin:4px 0;color:#333;}
+.footer-section{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;padding-top:18px;border-top:2px solid #d4af37;font-size:11px;}
+.footer-section h4{font-weight:bold;text-transform:uppercase;color:#1a472a;margin-bottom:7px;letter-spacing:1px;}
+.footer-section p{color:#333;margin:3px 0;}
+.sig-section{margin-top:32px;padding:26px;border:3px solid #d4af37;border-radius:8px;
+  text-align:center;background:linear-gradient(135deg,rgba(212,175,55,.05),rgba(212,175,55,.02));
+  box-shadow:0 0 20px rgba(212,175,55,.3);}
+.sig-section p{font-size:12px;margin-bottom:4px;font-weight:bold;color:#222;}
+.sig-hotel-name{font-size:11px;margin-bottom:28px;color:#1a472a;}
+.sig-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:bold;color:#1a472a;
+  margin:10px 0;animation:sigGlow 2.5s ease-in-out infinite;}
+@keyframes sigGlow{
+  0%,100%{text-shadow:0 0 6px rgba(212,175,55,.5),0 0 12px rgba(212,175,55,.3);}
+  50%{text-shadow:0 0 14px rgba(212,175,55,.9),0 0 28px rgba(212,175,55,.6),0 0 40px rgba(212,175,55,.3);}
+}
+.sig-designation{font-size:12px;color:#d4af37;font-weight:bold;margin:4px 0;}
+.sig-hotel{font-size:11px;color:#1a472a;margin-top:8px;font-weight:bold;}
+.sig-line{border-top:2px solid #d4af37;width:240px;margin:0 auto 14px;}
+.sig-thanks{font-size:12px;color:#555;font-style:italic;margin-bottom:6px;font-weight:600;letter-spacing:.5px;}
+.doc-controls{display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
+
+@media print{
+  #lockScreen{display:none!important;}
+  #page1{display:none!important;}
+  #page2{display:block!important;margin:0!important;box-shadow:none!important;}
+  .p2-inner{padding:20mm;position:relative!important;}
+  .print-hide{display:none!important;}
+  .watermark-wrap{opacity:0.15!important;display:flex!important;position:absolute!important;inset:0!important;}
+  body{background:#fff!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOCK SCREEN ══════════════ -->
+<div id="lockScreen">
+  <div class="lcard">
+    <div class="l-label">&#x2737; Room Confirmation System &#x2737;</div>
+
+    <div class="lock-svg-wrap">
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="14" y="36" width="52" height="36" rx="7" fill="#d4af37" opacity=".95"/>
+        <rect x="14" y="36" width="52" height="36" rx="7" fill="url(#lg1)"/>
+        <path d="M26 36V26C26 18.3 33.2 12 40 12C46.8 12 54 18.3 54 26V36" stroke="#f0c040" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <circle cx="40" cy="54" r="6" fill="#0a0e1a" opacity=".7"/>
+        <rect x="38" y="54" width="4" height="8" rx="2" fill="#0a0e1a" opacity=".7"/>
+        <defs>
+          <linearGradient id="lg1" x1="14" y1="36" x2="66" y2="72" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#f0c040"/>
+            <stop offset="100%" stop-color="#a07010"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="l-hotel">Hotel Neptune</div>
+    <div class="l-sub">Mansingh Inn &ndash; Morbi</div>
+    <div class="l-div"></div>
+    <div class="l-prompt">&#x1F4CD; Enter Password to Continue</div>
+
+    <div class="l-input-wrap">
+      <span class="l-input-icon">&#x1F511;</span>
+      <input class="l-input" type="password" id="lockPass" placeholder="Password"
+        onkeydown="if(event.key==='Enter')doUnlock()">
+    </div>
+    <button class="l-btn" onclick="doUnlock()">
+      <span style="margin-right:8px;">&#x1F513;</span> UNLOCK ACCESS
+    </button>
+    <div class="l-err" id="lockErr"></div>
+
+    <div class="l-foot">
+      <div class="lf1">Designed by &mdash; Aman K. Prajapati</div>
+      <div class="lf2">Just a single creation of devine.</div>
+      <div class="lf2">sridakshprajapati63540&#64;gmail.com</div>
+      <div class="lf3">Powered by Technology</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE 1: FORM ══════════════ -->
+<div id="page1" class="page active">
+  <div class="toggle-bar">
+    <button class="pg-toggle active" onclick="showPage(1)">&#x2630; Front Office Panel</button>
+    <button class="pg-toggle" onclick="showPage(2)">&#x1F4C4; Preview Document</button>
+  </div>
+  <div class="header-container">
+    <div class="hotel-title">Hotel Neptune Mansingh Inn &ndash; Morbi</div>
+    <div class="dev-box">
+      <div class="dev-name">Designed by &mdash; Aman K. Prajapati</div>
+      <div class="dev-sub">just a single creation of&nbsp;devine.</div>
+      <div class="dev-sub">sridakshprajapati63540&#64;gmail.com</div>
+      <div class="dev-sub tech">Powered by Technology</div>
+    </div>
+  </div>
+
+  <div class="control-panel">
+    <form id="mainForm">
+
+      <div class="form-section">
+        <div class="section-title">&#x25A6; Guest &amp; Booking Information</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Document Type *</label>
+            <select id="docType" onchange="onDocTypeChange()">
+              <option value="">-- Select --</option>
+              <option value="confirmation">Room Confirmation</option>
+              <option value="quotation">Quotation</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Guest Name *</label><input type="text" id="guestName" placeholder="Full Name"></div>
+          <div class="form-group"><label>Guest Mobile</label><input type="tel" id="guestMobile" placeholder="e.g. 9876543210"></div>
+          <div class="form-group"><label>Booking Date *</label><input type="date" id="bookingDate"></div>
+          <div class="form-group">
+            <label>Number of Rooms *</label>
+            <select id="numRooms" onchange="buildRooms()">
+              <option value="">-- Select --</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+              <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+              <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+              <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+              <option>21</option><option>22</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Referred By</label><input type="text" id="referredBy" placeholder="Optional"></div>
+        </div>
+      </div>
+
+      <div id="roomContainer"></div>
+
+      <div class="form-section">
+        <div class="section-title">&#x25A6; Stay Duration &amp; Guests</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Total Pax *</label><input type="number" id="pax" value="2" min="1"></div>
+          <div class="form-group"><label>Check-In Date *</label><input type="date" id="checkIn"></div>
+          <div class="form-group"><label>Check-Out Date *</label><input type="date" id="checkOut"></div>
+          <div class="form-group">
+            <label>Meal Plan *</label>
+            <select id="plan">
+              <option value="">-- Select --</option>
+              <option value="EP">EP</option><option value="CP">CP</option>
+              <option value="MAP">MAP</option><option value="AP">AP</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">&#x25A6; Pricing &amp; Charges</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Extra Person Rate *</label><input type="number" id="extraPersonRate" value="1000" min="0"></div>
+          <div class="form-group"><label>Discount Value</label><input type="number" id="discountValue" value="0" min="0"></div>
+          <div class="form-group">
+            <label>Discount Type</label>
+            <select id="discountType"><option value="%">% Percentage</option><option value="rs">Rs Fixed</option></select>
+          </div>
+          <div class="form-group"><label>Tax %</label><input type="number" id="taxPercent" value="0" min="0" max="100"></div>
+        </div>
+        <div id="advSection" style="margin-top:14px;">
+          <div class="form-grid">
+            <div class="form-group"><label>Advance Amount</label><input type="number" id="advanceAmount" value="0" min="0"></div>
+            <div class="form-group">
+              <label>Advance Mode *</label>
+              <select id="advanceMode" onchange="onAdvModeChange()">
+                <option value="">-- Select --</option>
+                <option value="upi">UPI</option><option value="cash">Cash</option>
+                <option value="card">Card</option><option value="bank">Bank Transfer</option>
+              </select>
+            </div>
+            <div class="form-group" id="utrGroup" style="display:none;"><label>UTR / Reference</label><input type="text" id="advanceRemark" placeholder="Enter reference"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">&#x25A6; Media &amp; Design</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Hotel Logo</label><input type="file" id="hotelLogo" accept="image/*" onchange="uploadLogo(event)"><div id="logoNote" class="storage-reminder"></div></div>
+          <div class="form-group"><label>Watermark Image</label><input type="file" id="watermarkFile" accept="image/*" onchange="uploadWatermark(event)"><div id="wmNote" class="storage-reminder"></div></div>
+          <div class="form-group"><label>Page Background Color</label><input type="color" id="pageColor" value="#ffffff" onchange="applyColor()"></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">&#x25A6; Personnel &amp; Conversation</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Salutation *</label>
+            <select id="salutation">
+              <option value="">-- Select --</option>
+              <option>Mr.</option><option>Mrs.</option><option>Ms.</option>
+              <option>Dr.</option><option>Prof.</option><option>Sir</option><option>Madam</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Conversation Type *</label>
+            <select id="convType">
+              <option value="">-- Select --</option>
+              <option value="Telephonic">Telephonic</option><option value="Direct">Direct</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Personnel Name *</label>
+            <select id="personnelName" onchange="onPersonnelChange()">
+              <option value="">-- Select --</option>
+              <option value="Aman K. Prajapati">Aman K. Prajapati</option>
+              <option value="Ambika Devi">Ambika Devi</option>
+              <option value="Prashant Boro">Prashant Boro</option>
+              <option value="other">Other (Custom)</option>
+            </select>
+          </div>
+          <div class="form-group" id="customNameBox" style="display:none;"><label>Custom Name</label><input type="text" id="customPersonnelName" placeholder="Enter name"></div>
+          <div class="form-group"><label>Personnel Type</label><input type="text" id="personnel" readonly style="opacity:.6;"></div>
+        </div>
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="form-group"><label>Remarks</label><textarea id="remarks" style="min-height:58px;" placeholder="Special requests..."></textarea></div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button type="button" class="btn-green" onclick="generateDoc()">&#128196; Generate Document</button>
+        <button type="button" class="btn-outline" onclick="saveDraft()">&#128190; Save Draft</button>
+        <button type="button" class="btn-gold" onclick="window.print()">&#128438; Print / PDF</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE 2: DOCUMENT ══════════════ -->
+<div id="page2" class="page">
+  <div class="doc-controls print-hide">
+    <button class="back-btn" onclick="showPage(1)">&#8592; Back</button>
+    <button class="btn-gold" onclick="dlJPG()">&#128229; Download JPG</button>
+    <button class="btn-gold" onclick="window.print()">&#128438; Print / PDF</button>
+  </div>
+
+  <div id="docPrint">
+    <div class="p2-inner">
+      <div class="watermark-wrap" id="wmBg"></div>
+      <div class="document-content">
+
+        <div class="greeting-box">
+          <div class="greeting-namaste">&#128591; NAMASTE &#128591;</div>
+          <div class="greeting-sal" id="greetMsg">Sir/Madam</div>
+          <div style="font-size:11px;color:#666;margin-top:8px;">Thank you for choosing Hotel Neptune Mansingh Inn, Morbi</div>
+        </div>
+
+        <div class="doc-header">
+          <div class="logo-area" id="logoArea"></div>
+          <div class="doc-title">
+            <h1 id="docTitle">Room Confirmation</h1>
+            <p>Hotel Neptune Mansingh Inn &ndash; Morbi</p>
+          </div>
+        </div>
+
+        <div class="info-block">
+          <h3>Guest Information</h3>
+          <p><strong>Name:</strong> <span id="dName">--</span></p>
+          <p><strong>Mobile:</strong> <span id="dMobile">--</span></p>
+          <p><strong>Booking Date:</strong> <span id="dBookingDate">--</span></p>
+          <p><strong>Check-In:</strong> <span id="dCheckIn">--</span> &nbsp;|&nbsp; <strong>Check-Out:</strong> <span id="dCheckOut">--</span> &nbsp;|&nbsp; <strong>Nights:</strong> <span id="dNights">--</span></p>
+          <p><strong>Total Pax:</strong> <span id="dPax">--</span> &nbsp;|&nbsp; <strong>Meal Plan:</strong> <span id="dPlan">--</span></p>
+          <p id="dRefRow" style="display:none;"><strong>Referred By:</strong> <span id="dRef">--</span></p>
+        </div>
+
+        <div id="dRooms"></div>
+        <div class="calc-section" id="dCalc"></div>
+
+        <div class="info-block" id="dRemarksBlock" style="display:none;"><h3>Special Remarks</h3><p id="dRemarks"></p></div>
+        <div class="info-block" id="dPayBlock" style="display:none;"><h3>Payment Details</h3><p id="dPay"></p></div>
+
+        <div class="terms-section">
+          <h3>Terms &amp; Conditions</h3>
+          <p>&#10003; Check-out time 12:00 noon. Rates on double occupancy.</p>
+          <p>&#10003; Extra person: Rs. 1000/- per bed (above 5 years)</p>
+          <p>&#10003; Taxes extra as per government norms</p>
+          <p>&#10003; 100% advance payment required</p>
+          <p>&#10003; Cancellation: 25% if 24hrs before, 100% after</p>
+          <p>&#10003; Valid ID proof required at check-in</p>
+          <p>&#10003; Children below 5 years: Complimentary</p>
+          <p>&#10003; Rates subject to change without notice</p>
+        </div>
+
+        <div class="footer-section">
+          <div>
+            <h4>Helpline &amp; Web</h4>
+            <p>&#128222; +91 99 0909 7903</p>
+            <p>&#127760; www.mansinghinn.com</p>
+            <p>&#128231; neptune&#64;mansinghinn.com</p>
+          </div>
+          <div>
+            <h4>Address</h4>
+            <p>Nexus Cinema Campus, Morbi Bypass Road</p>
+            <p>Nr. Navlakhi Fatak, Morbi, Gujarat 363641</p>
+            <p>&#128231; www.neptune&#64;mansinghinn.com</p>
+          </div>
+        </div>
+
+        <div class="sig-section">
+          <div class="sig-line"></div>
+          <p class="sig-thanks">Thanks &amp; Regards,</p>
+          <p class="sig-name" id="dPersonnelName">--</p>
+          <p class="sig-designation" id="dPersonnelType">--</p>
+          <p class="sig-hotel">Hotel Neptune Mansingh Inn - Morbi</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ UNLOCK ════════════════════════════════════════════════════════
+function doUnlock() {
+  var p = document.getElementById('lockPass').value;
+  if (p === '135') {
+    var ls = document.getElementById('lockScreen');
+    ls.style.opacity = '0';
+    ls.style.transition = 'opacity 0.6s ease';
+    setTimeout(function(){ ls.style.display = 'none'; }, 600);
+  } else {
+    var e = document.getElementById('lockErr');
+    e.textContent = '&#x2715; Incorrect password. Please try again.';
+    document.getElementById('lockPass').value = '';
+    document.getElementById('lockPass').style.borderColor = '#ff6b6b';
+    document.getElementById('lockPass').style.boxShadow = '0 0 0 3px rgba(255,107,107,.2)';
+    setTimeout(function(){
+      e.textContent = '';
+      document.getElementById('lockPass').style.borderColor = '';
+      document.getElementById('lockPass').style.boxShadow = '';
+    }, 3000);
+    document.getElementById('lockPass').focus();
+  }
+}
+
+// ══ INIT ═════════════════════════════════════════════════════════
+window.onload = function() {
+  var today = new Date().toISOString().split('T')[0];
+  var tom   = new Date(Date.now()+86400000).toISOString().split('T')[0];
+  document.getElementById('bookingDate').value = today;
+  document.getElementById('checkIn').value     = today;
+  document.getElementById('checkOut').value    = tom;
+  loadMedia();
+  loadDraft();
+};
+
+// ══ PAGE SWITCH ═══════════════════════════════════════════════════
+function showPage(n) {
+  document.getElementById('page1').classList.toggle('active', n===1);
+  document.getElementById('page2').classList.toggle('active', n===2);
+  document.querySelectorAll('.pg-toggle').forEach(function(b,i){ b.classList.toggle('active', i===n-1); });
+}
+
+// ══ DOC TYPE ══════════════════════════════════════════════════════
+function onDocTypeChange() {
+  var v = document.getElementById('docType').value;
+  document.getElementById('advSection').style.display = v==='quotation' ? 'none' : 'block';
+}
+
+// ══ BUILD ROOMS ═══════════════════════════════════════════════════
+function buildRooms() {
+  var n   = parseInt(document.getElementById('numRooms').value) || 0;
+  var box = document.getElementById('roomContainer');
+  box.innerHTML = '';
+  for (var i = 1; i <= n; i++) {
+    var d = document.createElement('div');
+    d.className = 'form-section';
+    d.innerHTML =
+      '<div class="section-title">&#x25A6; Room ' + i + ' Details</div>' +
+      '<div class="form-grid">' +
+        '<div class="form-group"><label>Room Type *</label>' +
+          '<select id="rType' + i + '">' +
+            '<option value="">-- Select --</option>' +
+            '<option value="Deluxe">Deluxe</option>' +
+            '<option value="Jr. Suite">Jr. Suite</option>' +
+          '</select></div>' +
+        '<div class="form-group"><label>Rate Per Night (Rs.) *</label>' +
+          '<input type="number" id="rRate' + i + '" placeholder="Rate" min="0">' +
+        '</div>' +
+      '</div>';
+    box.appendChild(d);
+  }
+}
+
+// ══ PERSONNEL ════════════════════════════════════════════════════
+function onPersonnelChange() {
+  var v = document.getElementById('personnelName').value;
+  document.getElementById('customNameBox').style.display = v === 'other' ? 'block' : 'none';
+  var pf = document.getElementById('personnel');
+  if      (v === 'Aman K. Prajapati')                    pf.value = 'Front Office Executive';
+  else if (v === 'Ambika Devi' || v === 'Prashant Boro') pf.value = 'Team Front Office';
+  else if (v === 'other')                                pf.value = 'Team Front Office';
+  else                                                   pf.value = '';
+}
+
+// ══ ADVANCE MODE ══════════════════════════════════════════════════
+function onAdvModeChange() {
+  var v = document.getElementById('advanceMode').value;
+  document.getElementById('utrGroup').style.display = (v && v !== 'cash') ? 'block' : 'none';
+}
+
+// ══ MEDIA ══════════════════════════════════════════════════════════
+function loadMedia() {
+  var logo = localStorage.getItem('hLogo');
+  if (logo) {
+    document.getElementById('logoArea').innerHTML = '<img src="' + logo + '">';
+    var ln = document.getElementById('logoNote');
+    ln.textContent = '&#10003; Logo loaded — click to remove';
+    ln.onclick = function() { localStorage.removeItem('hLogo'); document.getElementById('logoArea').innerHTML=''; ln.textContent=''; };
+  }
+  var wm = localStorage.getItem('hWM');
+  if (wm) {
+    document.getElementById('wmBg').innerHTML = '<img src="' + wm + '">';
+    var wn = document.getElementById('wmNote');
+    wn.textContent = '&#10003; Watermark loaded — click to remove';
+    wn.onclick = function() { localStorage.removeItem('hWM'); document.getElementById('wmBg').innerHTML=''; wn.textContent=''; };
+  }
+}
+function uploadLogo(e) {
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(x) { localStorage.setItem('hLogo', x.target.result); loadMedia(); };
+  r.readAsDataURL(f);
+}
+function uploadWatermark(e) {
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(x) { localStorage.setItem('hWM', x.target.result); loadMedia(); };
+  r.readAsDataURL(f);
+}
+function applyColor() {
+  document.getElementById('docPrint').style.backgroundColor = document.getElementById('pageColor').value;
+}
+
+// ══ VALIDATE ══════════════════════════════════════════════════════
+function validate() {
+  var dt = document.getElementById('docType').value;
+  if (!dt)                                              { alert('Select Document Type'); return false; }
+  if (!document.getElementById('guestName').value)     { alert('Enter Guest Name'); return false; }
+  if (!document.getElementById('bookingDate').value)   { alert('Select Booking Date'); return false; }
+  var n = parseInt(document.getElementById('numRooms').value) || 0;
+  if (!n)                                               { alert('Select Number of Rooms'); return false; }
+  if (!document.getElementById('checkIn').value)       { alert('Select Check-In Date'); return false; }
+  if (!document.getElementById('checkOut').value)      { alert('Select Check-Out Date'); return false; }
+  if (!document.getElementById('plan').value)          { alert('Select Meal Plan'); return false; }
+  if (!document.getElementById('salutation').value)    { alert('Select Salutation'); return false; }
+  if (!document.getElementById('convType').value)      { alert('Select Conversation Type'); return false; }
+  if (!document.getElementById('personnelName').value) { alert('Select Personnel Name'); return false; }
+  for (var i = 1; i <= n; i++) {
+    var rt = document.getElementById('rType' + i);
+    var rr = document.getElementById('rRate' + i);
+    if (!rt || !rt.value) { alert('Select type for Room ' + i); return false; }
+    if (!rr || !rr.value) { alert('Enter rate for Room ' + i); return false; }
+  }
+  if (dt !== 'quotation') {
+    if (!document.getElementById('advanceMode').value) { alert('Select Advance Mode'); return false; }
+    var am = document.getElementById('advanceMode').value;
+    if (am !== 'cash' && !document.getElementById('advanceRemark').value) { alert('Enter UTR for ' + am); return false; }
+  }
+  return true;
+}
+
+// ══ GENERATE ══════════════════════════════════════════════════════
+function generateDoc() {
+  if (!validate()) return;
+  var docType = document.getElementById('docType').value;
+  var n = parseInt(document.getElementById('numRooms').value);
+  var rooms = [];
+  for (var i = 1; i <= n; i++) rooms.push({ type: document.getElementById('rType'+i).value, rate: parseFloat(document.getElementById('rRate'+i).value)||0 });
+
+  var ciDate   = new Date(document.getElementById('checkIn').value);
+  var coDate   = new Date(document.getElementById('checkOut').value);
+  var nights   = Math.max(1, Math.ceil((coDate-ciDate)/86400000));
+  var pax      = parseInt(document.getElementById('pax').value)||1;
+  var xRate    = parseFloat(document.getElementById('extraPersonRate').value)||0;
+  var discVal  = parseFloat(document.getElementById('discountValue').value)||0;
+  var discTyp  = document.getElementById('discountType').value;
+  var taxPct   = parseFloat(document.getElementById('taxPercent').value)||0;
+  var advAmt   = docType!=='quotation' ? (parseFloat(document.getElementById('advanceAmount').value)||0) : 0;
+
+  var roomTotal=0; rooms.forEach(function(r){ roomTotal+=r.rate*nights; });
+  var avgRate   = rooms.length ? (roomTotal/nights/rooms.length).toFixed(0) : 0;
+  var xPersons  = Math.max(0, pax-rooms.length*2);
+  var xCharge   = xPersons*xRate*nights;
+  var subtotal  = roomTotal+xCharge;
+  var discount  = discTyp==='%' ? subtotal*discVal/100 : discVal;
+  var afterDisc = subtotal-discount;
+  var tax       = afterDisc*taxPct/100;
+  var grand     = afterDisc+tax;
+  var balance   = grand-advAmt;
+
+  var rHTML='<div style="margin:12px 0;">';
+  rooms.forEach(function(r,i){ rHTML+='<div class="room-card"><p><strong>Room '+(i+1)+' &nbsp;|&nbsp; '+r.type+'</strong></p><p>Rs. '+r.rate.toFixed(2)+'/night &times; '+nights+' nights = Rs. '+(r.rate*nights).toFixed(2)+'</p></div>'; });
+  rHTML+='</div>';
+  document.getElementById('dRooms').innerHTML=rHTML;
+
+  var cHTML=
+    '<div class="calc-item"><div class="calc-label">Room Charges ('+n+'&times;'+nights+'N &times; Rs.'+avgRate+')</div><div class="calc-value">= Rs. '+roomTotal.toFixed(2)+'</div></div>'+
+    '<div class="calc-item"><div class="calc-label">Extra Persons ('+xPersons+'&times;Rs.'+xRate+'&times;'+nights+'N)</div><div class="calc-value">= Rs. '+xCharge.toFixed(2)+'</div></div>'+
+    '<div class="calc-item"><div class="calc-label">Subtotal</div><div class="calc-value">= Rs. '+subtotal.toFixed(2)+'</div></div>'+
+    '<div class="calc-item"><div class="calc-label">Discount ('+(discTyp==='%'?discVal+'%':'Rs. '+discVal)+')</div><div class="calc-value">= Rs. '+discount.toFixed(2)+'</div></div>'+
+    '<div class="calc-item"><div class="calc-label">After Discount</div><div class="calc-value">= Rs. '+afterDisc.toFixed(2)+'</div></div>'+
+    '<div class="calc-item"><div class="calc-label">Tax ('+taxPct+'%)</div><div class="calc-value">+ Rs. '+tax.toFixed(2)+'</div></div>'+
+    '<div class="grand-total"><div class="grand-total-label">GRAND TOTAL</div><div class="grand-total-value">= Rs. '+grand.toFixed(2)+'</div></div>';
+  if (docType!=='quotation') {
+    cHTML+='<div class="calc-item"><div class="calc-label">Advance Paid</div><div class="calc-value">= Rs. '+advAmt.toFixed(2)+'</div></div>'+
+           '<div class="balance-box"><div class="balance-label">&#128176; BALANCE TO PAY</div><div class="balance-amount">= Rs. '+balance.toFixed(2)+'</div></div>';
+  }
+  document.getElementById('dCalc').innerHTML=cHTML;
+
+  document.getElementById('docTitle').textContent = docType==='quotation' ? 'Room Quotation' : 'Room Confirmation';
+  var sal=document.getElementById('salutation').value, conv=document.getElementById('convType').value;
+  var lbl=docType==='confirmation'?'confirmation letter':'quotation';
+  document.getElementById('greetMsg').textContent='Namaste '+sal+', As per our '+conv+' conversation, please find your '+lbl;
+
+  document.getElementById('dName').textContent       = document.getElementById('guestName').value;
+  document.getElementById('dMobile').textContent     = document.getElementById('guestMobile').value||'--';
+  document.getElementById('dBookingDate').textContent= fmt(document.getElementById('bookingDate').value);
+  document.getElementById('dCheckIn').textContent    = fmt(document.getElementById('checkIn').value);
+  document.getElementById('dCheckOut').textContent   = fmt(document.getElementById('checkOut').value);
+  document.getElementById('dNights').textContent     = nights;
+  document.getElementById('dPax').textContent        = pax;
+  document.getElementById('dPlan').textContent       = document.getElementById('plan').value;
+
+  var ref=document.getElementById('referredBy').value;
+  document.getElementById('dRefRow').style.display=ref?'block':'none';
+  document.getElementById('dRef').textContent=ref;
+
+  var rem=document.getElementById('remarks').value;
+  document.getElementById('dRemarksBlock').style.display=rem?'block':'none';
+  document.getElementById('dRemarks').textContent=rem;
+
+  var am=document.getElementById('advanceMode').value, ar=document.getElementById('advanceRemark').value;
+  if (docType!=='quotation'&&am!=='cash'&&ar) {
+    document.getElementById('dPay').innerHTML='<strong>Mode:</strong> '+am.toUpperCase()+' &nbsp;|&nbsp; <strong>Reference:</strong> '+ar;
+    document.getElementById('dPayBlock').style.display='block';
+  } else { document.getElementById('dPayBlock').style.display='none'; }
+
+  var pName=document.getElementById('personnelName').value==='other'?document.getElementById('customPersonnelName').value:document.getElementById('personnelName').value;
+  document.getElementById('dPersonnelName').textContent=pName;
+  document.getElementById('dPersonnelType').textContent=document.getElementById('personnel').value;
+
+  var lg=localStorage.getItem('hLogo');
+  if (lg) document.getElementById('logoArea').innerHTML='<img src="'+lg+'">';
+  document.getElementById('docPrint').style.backgroundColor=document.getElementById('pageColor').value;
+  showPage(2);
+}
+
+function fmt(d) {
+  if(!d) return '--';
+  var x=new Date(d);
+  return ('0'+x.getDate()).slice(-2)+'/'+('0'+(x.getMonth()+1)).slice(-2)+'/'+x.getFullYear();
+}
+
+// ══ DRAFT ══════════════════════════════════════════════════════════
+function saveDraft() {
+  var n=parseInt(document.getElementById('numRooms').value)||0, rooms={};
+  for(var i=1;i<=n;i++){ var rt=document.getElementById('rType'+i),rr=document.getElementById('rRate'+i); rooms[i]={type:rt?rt.value:'',rate:rr?rr.value:''}; }
+  var d={docType:document.getElementById('docType').value,guestName:document.getElementById('guestName').value,guestMobile:document.getElementById('guestMobile').value,bookingDate:document.getElementById('bookingDate').value,referredBy:document.getElementById('referredBy').value,numRooms:n,rooms:rooms,pax:document.getElementById('pax').value,checkIn:document.getElementById('checkIn').value,checkOut:document.getElementById('checkOut').value,plan:document.getElementById('plan').value,extraPersonRate:document.getElementById('extraPersonRate').value,discountValue:document.getElementById('discountValue').value,discountType:document.getElementById('discountType').value,taxPercent:document.getElementById('taxPercent').value,advanceAmount:document.getElementById('advanceAmount').value,advanceMode:document.getElementById('advanceMode').value,advanceRemark:document.getElementById('advanceRemark').value,salutation:document.getElementById('salutation').value,convType:document.getElementById('convType').value,personnelName:document.getElementById('personnelName').value,customPersonnelName:document.getElementById('customPersonnelName').value,personnel:document.getElementById('personnel').value,remarks:document.getElementById('remarks').value};
+  localStorage.setItem('hDraft',JSON.stringify(d));
+  alert('Draft saved!');
+}
+function loadDraft() {
+  var raw=localStorage.getItem('hDraft'); if(!raw) return;
+  var d=JSON.parse(raw);
+  ['docType','guestName','guestMobile','bookingDate','referredBy','pax','checkIn','checkOut','plan','extraPersonRate','discountValue','discountType','taxPercent','advanceAmount','advanceMode','advanceRemark','salutation','convType','personnelName','customPersonnelName','personnel','remarks'].forEach(function(id){ var el=document.getElementById(id); if(el&&d[id]!==undefined) el.value=d[id]; });
+  document.getElementById('numRooms').value=d.numRooms||'';
+  buildRooms();
+  if(d.rooms){ for(var i=1;i<=d.numRooms;i++){ if(d.rooms[i]){ var rt=document.getElementById('rType'+i),rr=document.getElementById('rRate'+i); if(rt)rt.value=d.rooms[i].type; if(rr)rr.value=d.rooms[i].rate; } } }
+  if(d.docType==='quotation') document.getElementById('advSection').style.display='none';
+  onPersonnelChange(); onAdvModeChange();
+}
+
+// ══ DOWNLOAD — High Quality A4 (300 DPI) ══════════════════════════
+function dlJPG() {
+  var inner = document.querySelector('.p2-inner');
+  var gn    = document.getElementById('guestName').value || 'Document';
+  var pc    = document.getElementById('pageColor').value || '#ffffff';
+
+  // A4 at 300 DPI = 2480 x 3508 px (professional print quality)
+  var A4W   = 2480;
+  var A4H   = 3508;
+  var margin = 120; // ~10mm margin at 300dpi
+
+  // Capture at scale:4 for crisp text and sharp edges
+  html2canvas(inner, {
+    backgroundColor: pc,
+    scale: 4,
+    useCORS: true,
+    allowTaint: true,
+    logging: false,
+    imageTimeout: 0,
+    width: inner.scrollWidth,
+    height: inner.scrollHeight,
+    windowWidth: inner.scrollWidth,
+    windowHeight: inner.scrollHeight
+  }).then(function(canvas) {
+
+    // ── Build final A4 canvas ──────────────────────────────────────
+    var final = document.createElement('canvas');
+    final.width  = A4W;
+    final.height = A4H;
+    var ctx = final.getContext('2d');
+
+    // Enable high-quality image smoothing
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    // Fill background
+    ctx.fillStyle = pc;
+    ctx.fillRect(0, 0, A4W, A4H);
+
+    // Subtle border frame (like a printed page edge)
+    ctx.strokeStyle = 'rgba(212,175,55,0.3)';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(30, 30, A4W - 60, A4H - 60);
+
+    // Scale content to fit inside A4 with margins
+    var maxW  = A4W - margin * 2;
+    var maxH  = A4H - margin * 2;
+    var ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
+    var dw    = canvas.width  * ratio;
+    var dh    = canvas.height * ratio;
+    var dx    = (A4W - dw) / 2;
+    var dy    = margin;
+
+    ctx.drawImage(canvas, dx, dy, dw, dh);
+
+    // ── PNG only — lossless, print quality ────────────────────────
+    var fname = 'HotelNeptune_' + gn.replace(/\s+/g,'_');
+    var aPNG = document.createElement('a');
+    aPNG.href     = final.toDataURL('image/png');
+    aPNG.download = fname + '_300dpi.png';
+    aPNG.click();
+  });
+}
+</script>
+</body>
+</html>
