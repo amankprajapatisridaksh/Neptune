@@ -224,10 +224,21 @@ button:hover{transform:translateY(-2px);filter:brightness(1.1);}
 ══════════════════════════════════════════════ */
 .watermark-wrap{
   position:absolute;inset:0;z-index:0;
-  display:flex;align-items:center;justify-content:center;
-  pointer-events:none;opacity:0.28;
+  pointer-events:none;
 }
-.watermark-wrap img{max-width:70%;max-height:70%;object-fit:contain;}
+.watermark-wrap img{
+  position:absolute;
+  top:50%;left:50%;
+  width:65%;
+  transform:translate(-50%,-50%);
+  opacity:0.28;
+  image-rendering:-webkit-optimize-contrast;
+  image-rendering:crisp-edges;
+  -ms-interpolation-mode:bicubic;
+  will-change:transform;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
 .document-content{position:relative;z-index:1;}
 
 .greeting-box{text-align:center;margin-bottom:28px;padding:20px;
@@ -506,7 +517,7 @@ button:hover{transform:translateY(-2px);filter:brightness(1.1);}
 <div id="page2" class="page">
   <div class="doc-controls print-hide">
     <button class="back-btn" onclick="showPage(1)">&#8592; Back</button>
-    <button class="btn-gold" onclick="dlJPG()">&#128229; Download JPG</button>
+    <button class="btn-gold" onclick="dlPNG()">&#128229; Download PNG</button>
     <button class="btn-gold" onclick="window.print()">&#128438; Print / PDF</button>
   </div>
 
@@ -863,15 +874,14 @@ function loadDraft() {
 }
 
 // ══ DOWNLOAD — High Quality Letter Size (300 DPI) ══════════════════
-function dlJPG() {
+function dlPNG() {
   var inner = document.querySelector('.p2-inner');
   var gn    = document.getElementById('guestName').value || 'Document';
   var pc    = document.getElementById('pageColor').value || '#ffffff';
 
-  // Capture content at scale:4
   html2canvas(inner, {
     backgroundColor: pc,
-    scale: 4,
+    scale: 6,
     useCORS: true,
     allowTaint: true,
     logging: false,
@@ -882,47 +892,50 @@ function dlJPG() {
     windowHeight: inner.scrollHeight
   }).then(function(canvas) {
 
-    // ── Build final canvas exactly matching content size ──────────
     var final = document.createElement('canvas');
     final.width  = canvas.width;
     final.height = canvas.height;
     var ctx = final.getContext('2d');
-
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-
-    // Fill background
     ctx.fillStyle = pc;
     ctx.fillRect(0, 0, final.width, final.height);
-
-    // Draw content
     ctx.drawImage(canvas, 0, 0);
 
-    // ── Draw watermark on top if present ─────────────────────────
-    var wmSrc = localStorage.getItem('hWM') || DEFAULT_WM;
+    var wmSrc = localStorage.getItem('hWM');
     function saveFile() {
       var fname = 'HotelNeptune_' + gn.replace(/\s+/g,'_');
-      var aPNG = document.createElement('a');
-      aPNG.href     = final.toDataURL('image/png');
-      aPNG.download = fname + '_300dpi.png';
-      aPNG.click();
+      var a = document.createElement('a');
+      a.href     = final.toDataURL('image/png');
+      a.download = fname + '_HQ.png';
+      a.click();
     }
-    if (wmSrc) {
-      var wmImg = new Image();
-      wmImg.onload = function() {
-        var maxSide = Math.min(final.width, final.height) * 0.65;
-        var scale   = Math.min(maxSide / wmImg.width, maxSide / wmImg.height);
-        var dw = wmImg.width * scale, dh = wmImg.height * scale;
-        var dx = (final.width - dw) / 2, dy = (final.height - dh) / 2;
-        ctx.globalAlpha = 0.28;
-        ctx.drawImage(wmImg, dx, dy, dw, dh);
-        ctx.globalAlpha = 1.0;
-        saveFile();
-      };
-      wmImg.src = wmSrc;
-    } else {
+    if (!wmSrc) { saveFile(); return; }
+
+    var wmImg = new Image();
+    wmImg.onload = function() {
+      // Use naturalWidth for true pixel dimensions — never CSS dimensions
+      var nw = wmImg.naturalWidth;
+      var nh = wmImg.naturalHeight;
+      // Size watermark to 65% of the shorter canvas side
+      var maxSide = Math.min(final.width, final.height) * 0.65;
+      var sc = Math.min(maxSide / nw, maxSide / nh);
+      // Integer pixels — eliminates sub-pixel blur
+      var dw = Math.round(nw * sc);
+      var dh = Math.round(nh * sc);
+      var dx = Math.round((final.width  - dw) / 2);
+      var dy = Math.round((final.height - dh) / 2);
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.globalAlpha = 0.30;
+      // Draw from source at full natural resolution to destination
+      ctx.drawImage(wmImg, 0, 0, nw, nh, dx, dy, dw, dh);
+      ctx.restore();
       saveFile();
-    }
+    };
+    wmImg.onerror = function() { saveFile(); };
+    wmImg.src = wmSrc;
   });
 }
 </script>
